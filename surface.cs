@@ -97,6 +97,7 @@ namespace Template
 				pixels[dest2 + x] = c;
 			}
 		}
+
 		// draw a solid bar
 		public void Bar( int x1, int y1, int x2, int y2, int c )
 		{
