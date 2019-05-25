@@ -27,15 +27,16 @@ namespace Template
 		// initialize
 		public void Init()
 		{
+            lightbuffer[1] = 10f;
         }
 		// tick: renders one frame
 		public void Tick()
-		{
-			screen.Clear( 0 );
+		{   
+            screen.Clear( 0 );
             ray ray = new ray();
             circles circ = new circles();
-            circ.POS = new Vector2(2f, 2f);
-            circ.R = 2f;
+            circ.POS = new Vector2(3, 3);
+            circ.R = 1f;
             box b = new box();
             b.X1 = 400;
             b.X2 = 450;
@@ -43,11 +44,11 @@ namespace Template
             b.Y2 = 450;
             b.C = MixColor(1, 0, 1);
             prim.Add(b);
-            prim.Add(circ);
-            lightbuffer[0] = 5f;
-            lightbuffer[1] = 5f;
-            lightbuffer[2] = 8f;
-            lightbuffer[3] = 2f;
+            prim.Add(circ);            
+            lightbuffer[0] += 1f;
+            lightbuffer[1] -= 1f;
+            lightbuffer[2] += 0.5f;
+            lightbuffer[3] += 1f;
             for(int i=0; i < 639; i++)
             {
                 for(int j = 0; j < 639; j++)
@@ -59,8 +60,8 @@ namespace Template
                         ray.o = new Vector2(lightbuffer[k], lightbuffer[k+1]);
                         ray.t = distanceToLight(ray, pos);
                         ray.d = normalizedDirectionToLight(ray, pos);
-                        if (intersectionBox(ray, pos, b) == false)
-                        {
+                        if (ray.intersectionc(circ, ray) == false && intersectionBox(ray, pos, b) == false)
+                            {
                             floatbuffer[i, j][0] += 0 / (float)((ray.t * Math.PI) + 1);
                             floatbuffer[i, j][1] += 1 / (float)((ray.t * Math.PI) + 1);
                             floatbuffer[i, j][2] += 1 / (float)((ray.t * Math.PI) + 1);
@@ -160,15 +161,17 @@ namespace Template
         {
             Vector2 c = circ.POS - ray.o;
             float t = Vector2.Dot(c, ray.d);
-            if (t > ray.t || t < 0)
+            Vector2 q = c - (t * ray.d);
+            float p2 = Vector2.Dot(q, q);
+            float tocircle = t - (float)Math.Sqrt(((circ.R * circ.R) - p2));
+            if (tocircle > ray.t || t < 0)
             {
-
                 return false;
             }
             else
             {
-                Vector2 q = c - (t * ray.d);
-                float p2 = Vector2.Dot(q, q);
+                
+                
                 if ((circ.R * circ.R) < p2) { return false; }
                 else
                 {
