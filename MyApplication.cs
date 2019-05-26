@@ -23,13 +23,33 @@ namespace Template
         //lightsources list.
         public float[] lightbuffer = new float[4];
         // primitives list
-        List<primitives> prim = new List<primitives>();
+        List<primitives> prim1 = new List<primitives>();
+        List<box> prim = new List<box>();
         // initialize
         public void Init()
         {
             lightbuffer[1] = 10f;
-
-            
+            box b = new box();
+            b.X1 = 400;
+            b.X2 = 450;
+            b.Y1 = 400;
+            b.Y2 = 450;
+            b.C = MixColor(0.5f, 0.5f, 0);
+            box b1 = new box();
+            b1.X1 = 200;
+            b1.X2 = 250;
+            b1.Y1 = 200;
+            b1.Y2 = 250;
+            b1.C = MixColor(1, 0, 1);
+            box b2 = new box();
+            b2.X1 = 400;
+            b2.X2 = 450;
+            b2.Y1 = 200;
+            b2.Y2 = 250;
+            b2.C = MixColor(1, 1, 0);
+            prim.Add(b);
+            prim.Add(b1);
+            prim.Add(b2);
         }
         // tick: renders one frame
         public void Tick()
@@ -38,15 +58,7 @@ namespace Template
             ray ray = new ray();
             circles circ = new circles();
             circ.POS = new Vector2(3, 3);
-            circ.R = 1f;
-            box b = new box();
-            b.X1 = 400;
-            b.X2 = 450;
-            b.Y1 = 400;
-            b.Y2 = 450;
-            b.C = MixColor(1, 0, 1);
-            prim.Add(b);
-            prim.Add(circ);
+            circ.R = 1f;            
             lightbuffer[0] += 1f;
             lightbuffer[1] -= 1f;
             lightbuffer[2] += 0.5f;
@@ -62,11 +74,13 @@ namespace Template
                         ray.o = new Vector2(lightbuffer[k], lightbuffer[k + 1]);
                         ray.t = distanceToLight(ray, pos);
                         ray.d = normalizedDirectionToLight(ray, pos);
-                        if (ray.intersectionc(circ, ray) == false && intersectionBox(ray, pos, b) == false)
-                        {
-                            floatbuffer[i, j][0] += 1 / (float)((ray.t * Math.PI) + 1);
-                            floatbuffer[i, j][1] += 0 / (float)((ray.t * Math.PI) + 1);
-                            floatbuffer[i, j][2] += 1 / (float)((ray.t * Math.PI) + 1);
+                        for (int z = 0; z <prim.Count; z++) {
+                            if (ray.intersectionc(circ, ray) == false && intersectionBox(ray, pos, prim[z]) == false)
+                            {
+                                floatbuffer[i, j][0] += 1 / (float)((ray.t * Math.PI) + 1);
+                                floatbuffer[i, j][1] += 0 / (float)((ray.t * Math.PI) + 1);
+                                floatbuffer[i, j][2] += 1 / (float)((ray.t * Math.PI) + 1);
+                            }
                         }
                         k++;
                     }
@@ -76,11 +90,14 @@ namespace Template
                         ray.o = new Vector2(lightbuffer[k], lightbuffer[k + 1]);
                         ray.t = distanceToLight(ray, pos);
                         ray.d = normalizedDirectionToLight(ray, pos);
-                        if (ray.intersectionc(circ, ray) == false && intersectionBox(ray, pos, b) == false)
+                        for (int z = 0; z < prim.Count; z++)
                         {
-                            floatbuffer[i, j][0] += 0 / (float)((ray.t * Math.PI) + 1);
-                            floatbuffer[i, j][1] += 1 / (float)((ray.t * Math.PI) + 1);
-                            floatbuffer[i, j][2] += 1 / (float)((ray.t * Math.PI) + 1);
+                            if (ray.intersectionc(circ, ray) == false && intersectionBox(ray, pos, prim[z]) == false)
+                            {
+                                floatbuffer[i, j][0] += 0 / (float)((ray.t * Math.PI) + 1);
+                                floatbuffer[i, j][1] += 1 / (float)((ray.t * Math.PI) + 1);
+                                floatbuffer[i, j][2] += 1 / (float)((ray.t * Math.PI) + 1);
+                            }
                         }
                         k++;
                     }
@@ -88,8 +105,10 @@ namespace Template
 
                 }
             }
-            screen.Bar(b.X1, b.Y1, b.X2, b.Y2, b.C);
             screen.Circle(192, 192, 64, MixColor(1, 0, 1));
+            screen.Bar(prim[0].X1, prim[0].Y1, prim[0].X2, prim[0].Y2, prim[0].C);
+            screen.Bar(prim[1].X1, prim[1].Y1, prim[1].X2, prim[1].Y2, prim[1].C);
+            screen.Bar(prim[2].X1, prim[2].Y1, prim[2].X2, prim[2].Y2, prim[2].C);
         }
 
         public float distanceToLight(ray ray, Vector2 pos)
