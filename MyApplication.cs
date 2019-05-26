@@ -5,8 +5,8 @@ using System.Collections.Generic;
 
 namespace Template
 {
-	class MyApplication
-	{
+    class MyApplication
+    {
         /*
          eerste elke pixelcolor 0;
          pixelcoordinaten omzetten naar x=10,y=10;
@@ -16,23 +16,25 @@ namespace Template
          niet, reken hoeveelheid licht uit.
          plotten.
          */
-		// member variables
-		public Surface screen;
+        // member variables
+        public Surface screen;
         // 3 floats for the colors per pixel.
-        public float[,][] floatbuffer = new float[640,640][];
+        public float[,][] floatbuffer = new float[640, 640][];
         //lightsources list.
         public float[] lightbuffer = new float[4];
         // primitives list
-        List<primitives> prim = new List<primitives>(); 
-		// initialize
-		public void Init()
-		{
+        List<primitives> prim = new List<primitives>();
+        // initialize
+        public void Init()
+        {
             lightbuffer[1] = 10f;
+
+            
         }
-		// tick: renders one frame
-		public void Tick()
-		{   
-            screen.Clear( 0 );
+        // tick: renders one frame
+        public void Tick()
+        {
+            screen.Clear(0);
             ray ray = new ray();
             circles circ = new circles();
             circ.POS = new Vector2(3, 3);
@@ -44,24 +46,38 @@ namespace Template
             b.Y2 = 450;
             b.C = MixColor(1, 0, 1);
             prim.Add(b);
-            prim.Add(circ);            
+            prim.Add(circ);
             lightbuffer[0] += 1f;
             lightbuffer[1] -= 1f;
             lightbuffer[2] += 0.5f;
             lightbuffer[3] += 1f;
-            for(int i=0; i < 639; i++)
+            for (int i = 0; i < 639; i++)
             {
-                for(int j = 0; j < 639; j++)
+                for (int j = 0; j < 639; j++)
                 {
                     floatbuffer[i, j] = new float[] { 0, 0, 0 };
-                    for (int k = 0; k < 4; k++)
+                    for (int k = 0; k < 2; k++)
                     {
                         Vector2 pos = new Vector2((10f / 639f) * i, (10f / 639f) * j);
-                        ray.o = new Vector2(lightbuffer[k], lightbuffer[k+1]);
+                        ray.o = new Vector2(lightbuffer[k], lightbuffer[k + 1]);
                         ray.t = distanceToLight(ray, pos);
                         ray.d = normalizedDirectionToLight(ray, pos);
                         if (ray.intersectionc(circ, ray) == false && intersectionBox(ray, pos, b) == false)
-                            {
+                        {
+                            floatbuffer[i, j][0] += 1 / (float)((ray.t * Math.PI) + 1);
+                            floatbuffer[i, j][1] += 0 / (float)((ray.t * Math.PI) + 1);
+                            floatbuffer[i, j][2] += 1 / (float)((ray.t * Math.PI) + 1);
+                        }
+                        k++;
+                    }
+                    for (int k = 2; k < 4; k++)
+                    {
+                        Vector2 pos = new Vector2((10f / 639f) * i, (10f / 639f) * j);
+                        ray.o = new Vector2(lightbuffer[k], lightbuffer[k + 1]);
+                        ray.t = distanceToLight(ray, pos);
+                        ray.d = normalizedDirectionToLight(ray, pos);
+                        if (ray.intersectionc(circ, ray) == false && intersectionBox(ray, pos, b) == false)
+                        {
                             floatbuffer[i, j][0] += 0 / (float)((ray.t * Math.PI) + 1);
                             floatbuffer[i, j][1] += 1 / (float)((ray.t * Math.PI) + 1);
                             floatbuffer[i, j][2] += 1 / (float)((ray.t * Math.PI) + 1);
@@ -69,10 +85,11 @@ namespace Template
                         k++;
                     }
                     screen.Plot(i, j, MixColor(floatbuffer[i, j][0], floatbuffer[i, j][1], floatbuffer[i, j][2]));
-                   
+
                 }
             }
             screen.Bar(b.X1, b.Y1, b.X2, b.Y2, b.C);
+            screen.Circle(192, 192, 64, MixColor(1, 0, 1));
         }
 
         public float distanceToLight(ray ray, Vector2 pos)
@@ -87,13 +104,13 @@ namespace Template
 
         int MixColor(float red, float green, float blue)
         {
-            return ((int)(red*255) << 16) + ((int)(green*255) << 8) + (int)(blue*255);
+            return ((int)(red * 255) << 16) + ((int)(green * 255) << 8) + (int)(blue * 255);
         }
 
         public bool intersectionBox(ray r, Vector2 p, box b)
         {
             //box pixelcoordinates to world coordinates
-            float bx1 = b.X1 * (10f/639f);
+            float bx1 = b.X1 * (10f / 639f);
             float by1 = b.Y1 * (10f / 639f);
             float bx2 = b.X2 * (10f / 639f);
             float by2 = b.Y2 * (10f / 639f);
@@ -104,12 +121,12 @@ namespace Template
             Vector2 tlc = new Vector2(bx1, by1);
             Vector2 trc = new Vector2(bx2, by1);
             //ensure that it is not inside the box. Else you have an intersection immediatly.
-            if(p.X>blc.X && p.X<trc.X && p.Y<blc.Y && p.Y>trc.Y && r.o.X > blc.X && r.o.X < trc.X && r.o.Y < blc.Y && r.o.Y > trc.Y)
+            if (p.X > blc.X && p.X < trc.X && p.Y < blc.Y && p.Y > trc.Y && r.o.X > blc.X && r.o.X < trc.X && r.o.Y < blc.Y && r.o.Y > trc.Y)
             {
                 return true;
             }
             // check for intersection for every vector of the box.
-            if (lineIntersection(r,p, tlc, blc))
+            if (lineIntersection(r, p, tlc, blc))
                 return true;
             if (lineIntersection(r, p, blc, brc))
                 return true;
@@ -126,7 +143,7 @@ namespace Template
             float d = ((v2.Y - v1.Y) * (-r.o.X + p.X) - (v2.X - v1.X) * (-r.o.Y + p.Y));
             float n = ((v2.X - v1.X) * (r.o.Y - v1.Y) - (v2.Y - v1.Y) * (r.o.X - v1.X));
             float n2 = ((-r.o.X + p.X) * (r.o.Y - v1.Y) - (-r.o.Y + p.Y) * (r.o.X - v1.X));
-            if(d== 0f)
+            if (d == 0f)
             {
                 return false;
             }
@@ -170,8 +187,8 @@ namespace Template
             }
             else
             {
-                
-                
+
+
                 if ((circ.R * circ.R) < p2) { return false; }
                 else
                 {
@@ -201,7 +218,7 @@ namespace Template
             get { return r; }
             set { r = value; }
         }
-        
+
     }
 
     class box : primitives

@@ -80,8 +80,27 @@ namespace Template
 				}
 			}
 		}
-		// draw a rectangle
-		public void Box( int x1, int y1, int x2, int y2, int c )
+        // draw a circle
+        public void Circle(int x, int y, int r, int color)
+        {
+            const double PI = 3.1415926535;
+            double i, angle, x1, y1, j, radius;
+            for (j = 0; j < 1; j+=0.01)
+            {
+                radius = r - r * j;
+                Console.WriteLine(j);
+                for (i = 0; i < 360; i += 0.1)
+                {
+                    angle = i; 
+                    x1 = radius * Math.Cos(angle * PI / 180);
+                    y1 = radius * Math.Sin(angle * PI / 180);
+                    Plot((int)(x + x1), (int)(y + y1), color);
+                }
+            }
+            
+        }
+        // draw a rectangle
+        public void Box( int x1, int y1, int x2, int y2, int c )
 		{
 			int dest = y1 * width;
 			for( int y = y1; y <= y2; y++, dest += width )
