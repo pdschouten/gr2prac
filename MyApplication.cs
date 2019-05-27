@@ -18,10 +18,11 @@ namespace Template
         // primitives list
         List<primitives> prim1 = new List<primitives>();
         List<box> prim = new List<box>();
+        triangle tr1 = new triangle();
         // initialize
         public void Init()
         {
-            lightbuffer[0] = worldsize-18f;
+            lightbuffer[0] = worldsize - 18f;
             lightbuffer[1] = worldsize - 19f;
             lightbuffer[2] = worldsize - 2f;
             lightbuffer[3] = worldsize - 2f;
@@ -46,6 +47,12 @@ namespace Template
             prim.Add(b);
             prim.Add(b1);
             prim.Add(b2);
+            
+            tr1.X = 100;
+            tr1.Y = 500;
+            tr1.W = 100;
+            tr1.H = 100;
+            tr1.C = MixColor(0.25f, 5f, 1f);
         }
         // tick: renders one frame
         public void Tick()
@@ -86,7 +93,7 @@ namespace Template
                         ray.o = new Vector2(lightbuffer[k]+(ray.d.X*offset), lightbuffer[k + 1]+(ray.d.X*offset));
                         for (int z = 0; z < prim.Count; z++)
                         {
-                            if (ray.intersectionc(circ, ray) == false && intersectionBox(ray, pos, prim[z]) == false)
+                            if (ray.intersectionc(circ, ray) == false && intersectionBox(ray, pos, prim[z]) == false && intersectionTriangle(ray, pos, tr1) == false)
                             {
                                 floatbuffer[i, j][0] +=  0/ (float)((ray.t * Math.PI) + 1);
                                 floatbuffer[i, j][1] += 1 / (float)((ray.t * Math.PI) + 1);
@@ -102,6 +109,7 @@ namespace Template
             screen.Bar(prim[0].X1, prim[0].Y1, prim[0].X2, prim[0].Y2, prim[0].C);
             screen.Bar(prim[1].X1, prim[1].Y1, prim[1].X2, prim[1].Y2, prim[1].C);
             screen.Bar(prim[2].X1, prim[2].Y1, prim[2].X2, prim[2].Y2, prim[2].C);
+            screen.Triangle(100, 500, 100, 100, tr1.C);
         }
 
         public float distanceToLight(ray ray, Vector2 pos)
@@ -145,6 +153,35 @@ namespace Template
             if (lineIntersection(r, p, tlc, trc))
                 return true;
             if (lineIntersection(r, p, trc, brc))
+                return true;
+            return false;
+        }
+
+        public bool intersectionTriangle(ray r, Vector2 p, triangle t)
+        {
+            //box pixelcoordinates to world coordinates
+            float tx = t.X * (worldsize / 639f);
+            float ty = t.Y * (worldsize / 639f);
+            float tw = t.W * (worldsize / 639f);
+            float th = t.H * (worldsize / 639f);
+
+            //3 vectors, for every line of the triangle 1
+            Vector2 blc = new Vector2(tx , ty+th);
+            Vector2 brc = new Vector2(tx+tw, ty+th);
+            Vector2 tc = new Vector2(tx + (tw / 2), ty);
+
+            ////ensure that it is not inside the triangle. Else you have an intersection immediatly.
+            //if (p.X > blc.X && p.X < trc.X && p.Y < blc.Y && p.Y > trc.Y && r.o.X > blc.X && r.o.X < trc.X && r.o.Y < blc.Y && r.o.Y > trc.Y)
+            //{
+            //    return true;
+            //}
+
+            // check for intersection for every vector of the triangle.
+            if (lineIntersection(r, p, blc, tc))
+                return true;
+            if (lineIntersection(r, p, tc, brc))
+                return true;
+            if (lineIntersection(r, p, brc, blc))
                 return true;
             return false;
         }
@@ -256,6 +293,36 @@ namespace Template
         {
             get { return y2; }
             set { y2 = value; }
+        }
+        public int C
+        {
+            get { return c; }
+            set { c = value; }
+        }
+    }
+    class triangle : primitives
+    {
+        int x, y, w, h;
+        int c;
+        public int X
+        {
+            get { return x; }
+            set { x = value; }
+        }
+        public int Y
+        {
+            get { return y; }
+            set { y = value; }
+        }
+        public int W
+        {
+            get { return w; }
+            set { w = value; }
+        }
+        public int H
+        {
+            get { return h; }
+            set { h = value; }
         }
         public int C
         {

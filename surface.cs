@@ -100,24 +100,24 @@ namespace Template
             
         }
         // draw a triangle
-        public void Triangle(int x, int y, int x2, int y2, int c)
+        public void Triangle(int x, int y, int w, int h, int c)
         {
-            for(int i=0; i<x; i++)
+            for(int i=0; i<w; i++)
             {
-                for (int j=0; j<y; j++)
+                for (int j=0; j<h; j++)
                 {
-                    if (i < x / 2)
+                    if (i < w / 2)
                     {
-                        if ((y * i * 2) + (x * j) > x * y)
+                        if ((h * i * 2) + (w * j) > w * h)
                         {
-                            pixels[(i + x2) + (j + y2) * width] = c;
+                            pixels[(i + x) + (j + y) * width] = c;
                         }
                     }
                     else
                     {
-                        if ((y * i * 2) - (x * j) < x * y)
+                        if ((h * i * 2) - (w * j) < w * h)
                         {
-                            pixels[(i + x2) + (j + y2) * width] = c;
+                            pixels[(i + x) + (j + y) * width] = c;
                         }
                     }
                 }
