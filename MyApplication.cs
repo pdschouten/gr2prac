@@ -192,14 +192,28 @@ namespace Template
                     screen.Plot(i, j, MixColor(MathHelper.Clamp(floatbuffer[i, j][0], 0, 1), MathHelper.Clamp(floatbuffer[i, j][1], 0, 1), MathHelper.Clamp(floatbuffer[i, j][2], 0, 1)));
                 }
             }
-            
-            screen.Bar(prim[0].X, prim[0].Y, prim[0].W, prim[0].H, prim[0].C);
-            screen.Bar(prim[1].X, prim[1].Y, prim[1].W, prim[1].H, prim[1].C);
-            screen.Bar(prim[2].X, prim[2].Y, prim[2].W, prim[2].H, prim[2].C);
-            screen.Circle(prim[3].X, prim[3].Y, prim[3].W, prim[3].C);
-            screen.Triangle(prim[4].X, prim[4].Y, prim[4].W, prim[4].H, prim[4].C);
+            primitivesDraw();            
         }
 
+        public void primitivesDraw()
+        {
+            for(int i=0; i<prim.Count; i++)
+            {
+                if (prim[i].TYPE == "box")
+                {
+                    screen.Bar(prim[i].X, prim[i].Y, prim[i].W, prim[i].H, prim[i].C);
+                }
+                if (prim[i].TYPE == "circle")
+                {
+                    screen.Circle(prim[i].X, prim[i].Y, prim[i].W, prim[i].C);
+
+                }
+                if (prim[i].TYPE == "triangle")
+                {
+                    screen.Triangle(prim[i].X, prim[i].Y, prim[i].W, prim[i].H, prim[i].C);
+                }
+            }
+        }
 
         public void plot(int x, int y)
         {
@@ -217,14 +231,13 @@ namespace Template
                         ray.t = distanceToLight(ray, pos) - (2f * offset);
                         ray.d = normalizedDirectionToLight(ray, pos);
                         ray.o = new Vector2(lightbuffer[k] + (ray.d.X * offset), lightbuffer[k + 1] + (ray.d.X * offset));
-                        
-                            if (intersectionPrimitives(ray, pos) == false)
-                            {
-                                floatbuffer[i, j][0] += 0 / (float)((ray.t * Math.PI) + 1);
-                                floatbuffer[i, j][1] += 1 / (float)((ray.t * Math.PI) + 1);
-                                floatbuffer[i, j][2] += 1 / (float)((ray.t * Math.PI) + 1);
-                            }
-                        
+
+                        if (intersectionPrimitives(ray, pos) == false)
+                        {
+                            floatbuffer[i, j][0] += 0 / (float)((ray.t * Math.PI) + 1);
+                            floatbuffer[i, j][1] += 1 / (float)((ray.t * Math.PI) + 1);
+                            floatbuffer[i, j][2] += 1 / (float)((ray.t * Math.PI) + 1);
+                        }
                     }
                 }
             }
@@ -273,6 +286,7 @@ namespace Template
             }
             return false;
         }
+
         public bool intersectionBox(ray r, Vector2 p, primitives b)
         {
             //box pixelcoordinates to world coordinates
@@ -345,18 +359,17 @@ namespace Template
             {
                 return false;
             }
+            if ((radius * radius) < p2)
+            {
+                return false;
+            }
             else
             {
-
-
-                if ((radius * radius) < p2) { return false; }
-                else
-                {
-                    r.t = t;
-                    return true;
-                }
+                r.t = t;
+                return true;
             }
         }
+
         public bool intersectionLine(ray r, Vector2 p, Vector2 v1, Vector2 v2)
         {
 
