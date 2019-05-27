@@ -88,17 +88,41 @@ namespace Template
             for (j = 0; j < 1; j+=0.01)
             {
                 radius = r - r * j;
-                Console.WriteLine(j);
                 for (i = 0; i < 360; i += 0.1)
                 {
                     angle = i; 
                     x1 = radius * Math.Cos(angle * PI / 180);
                     y1 = radius * Math.Sin(angle * PI / 180);
-                    Plot((int)(x + x1), (int)(y + y1), color);
+                    pixels[(int)(x + x1) + (int)(y + y1) * width] = color;
                 }
             }
             
         }
+        // draw a triangle
+        public void Triangle(int x, int y, int x2, int y2, int c)
+        {
+            for(int i=0; i<x; i++)
+            {
+                for (int j=0; j<y; j++)
+                {
+                    if (i < x / 2)
+                    {
+                        if ((y * i * 2) + (x * j) > x * y)
+                        {
+                            pixels[(i + x2) + (j + y2) * width] = c;
+                        }
+                    }
+                    else
+                    {
+                        if ((y * i * 2) - (x * j) < x * y)
+                        {
+                            pixels[(i + x2) + (j + y2) * width] = c;
+                        }
+                    }
+                }
+            }
+        }
+
         // draw a rectangle
         public void Box( int x1, int y1, int x2, int y2, int c )
 		{
