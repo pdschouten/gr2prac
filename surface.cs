@@ -81,13 +81,13 @@ namespace Template
 			}
 		}
         // draw a circle
-        public void Circle(int x, int y, int r, int color)
+        public void Circle(int x, int y, int w, int color)
         {
             const double PI = 3.1415926535;
             double i, angle, x1, y1, j, radius;
             for (j = 0; j < 1; j+=0.01)
             {
-                radius = r - r * j;
+                radius = w/2 - w/2 * j;
                 //Console.WriteLine(j);
                 for (i = 0; i < 360; i += 0.1)
                 {

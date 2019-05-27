@@ -10,91 +10,117 @@ namespace Template
     {
         // member variables
         public Surface screen;
+
         // 3 floats for the colors per pixel.
         public static float[,][] floatbuffer = new float[640, 640][];
+
         //lightsources list.
         public static float[] lightbuffer = new float[4];
+
         // worldsize
         public static float worldsize = 20f;
+
         // primitives list
-        public static List<primitives> prim1 = new List<primitives>();
-        public static List<box> prim = new List<box>();
-        public static triangle tr1 = new triangle();
-        public static circles circ = new circles();
+        public static List<primitives> prim = new List<primitives>();        
+        
         //texture
         public Surface map;
         public static float[,][] c;
 
+        //multi-thread
         public static Thread[] tarr = new Thread[8];
+
         // initialize
         public void Init()
         {
-            //load in the image and find the colors for every pixel.
+            //load texture and find the colors for every pixel
             map = new Surface("../../assets/tiles.png");
             c = new float[640, 640][];            texture(floatbuffer, c, map);
-            //start values for the two lights.
+
+            //lights startvalues
             lightbuffer[0] = worldsize - 18f;
             lightbuffer[1] = worldsize - 19f;
             lightbuffer[2] = worldsize - 2f;
             lightbuffer[3] = worldsize - 2f;
-            //declare boxes
-            box b = new box();
-            b.X1 = 400;
-            b.X2 = 450;
-            b.Y1 = 400;
-            b.Y2 = 450;
-            b.C = MixColor(0.5f, 0.5f, 0);
-            box b1 = new box();
-            b1.X1 = 200;
-            b1.X2 = 250;
-            b1.Y1 = 200;
-            b1.Y2 = 250;
-            b1.C = MixColor(1, 0, 1);
-            box b2 = new box();
-            b2.X1 = 400;
-            b2.X2 = 450;
-            b2.Y1 = 200;
-            b2.Y2 = 250;
-            b2.C = MixColor(1, 1, 0);
 
-            //add boxes to box array
-            prim.Add(b);
-            prim.Add(b1);
-            prim.Add(b2);
-            
-            //triangle declarationi
+            //box declaration            
+            box b1 = new box();
+            b1.X = 200;
+            b1.Y = 200;
+            b1.W = 50;
+            b1.H = 50;
+            b1.X2 = b1.X + b1.W;
+            b1.Y2 = b1.Y + b1.H;
+            b1.C = MixColor(0, 0, 1);
+            b1.TYPE = "box";
+            box b2 = new box();
+            b2.X = 400;
+            b2.Y = 200;
+            b2.W = 50;
+            b2.H = 50;
+            b2.X2 = b2.X + b2.W;
+            b2.Y2 = b2.Y + b2.H;
+            b2.C = MixColor(0, 1, 0);
+            b2.TYPE = "box";
+            box b3 = new box();
+            b3.X = 400;
+            b3.Y = 400;
+            b3.W = 50;
+            b3.H = 50;
+            b3.X2 = b3.X + b3.W;
+            b3.Y2 = b3.Y + b3.H;
+            b3.C = MixColor(1, 0, 0);
+            b3.TYPE = "box";
+
+            //triangle declaration
+            triangle tr1 = new triangle();
             tr1.X = 100;
             tr1.Y = 500;
             tr1.W = 100;
             tr1.H = 100;
+            tr1.XT = tr1.X + (tr1.W / 2);
             tr1.C = MixColor(0.25f, 5f, 1f);
+            tr1.TYPE = "triangle";
 
             //circle declaration
-            circ.POS = new Vector2(3, 3);
-            circ.R = 1f;
+            circle circ1 = new circle();
+            circ1.X = 200;
+            circ1.Y = 200;
+            circ1.W = 50;
+            circ1.H = circ1.W;
+            circ1.POS = new Vector2(3, 3);
+            circ1.R = circ1.W/2;
+            circ1.TYPE = "circle";
+
+            //add primitives to List            
+            prim.Add(b1);
+            prim.Add(b2);
+            prim.Add(b3);
+            prim.Add(tr1);
+            prim.Add(circ1);
 
         }
         // tick: renders one frame
         public void Tick()
         {
             screen.Clear(0);
-            //move the lights
-            if (lightbuffer[0] < 15f)
-            {
-                lightbuffer[0] += 1f;
-            }
-            else
-            {
-                lightbuffer[0] -= 1f;
-            }
-            if (lightbuffer[2] > 15f)
-            {
-                lightbuffer[2] -= 1f;
-            }
-            else
-            {
-                lightbuffer[2] += 1f;
-            }
+            ////move the lights
+            //if (lightbuffer[0] < 15f)
+            //{
+            //    lightbuffer[0] += 1f;
+            //}
+            //else
+            //{
+            //    lightbuffer[0] -= 1f;
+            //}
+            //if (lightbuffer[2] > 15f)
+            //{
+            //    lightbuffer[2] -= 1f;
+            //}
+            //else
+            //{
+            //    lightbuffer[2] += 1f;
+            //}
             //int tr = 0;
             //while(tr< tarr.Length)
             //{
@@ -166,11 +192,12 @@ namespace Template
                     screen.Plot(i, j, MixColor(MathHelper.Clamp(floatbuffer[i, j][0], 0, 1), MathHelper.Clamp(floatbuffer[i, j][1], 0, 1), MathHelper.Clamp(floatbuffer[i, j][2], 0, 1)));
                 }
             }
-            screen.Circle((int)(circ.POS.X * (639 / worldsize)), (int)(circ.POS.Y * (639 / worldsize)), (int)(circ.R * (639 / worldsize)), MixColor(1, 0, 1));
-            screen.Bar(prim[0].X1, prim[0].Y1, prim[0].X2, prim[0].Y2, prim[0].C);
-            screen.Bar(prim[1].X1, prim[1].Y1, prim[1].X2, prim[1].Y2, prim[1].C);
-            screen.Bar(prim[2].X1, prim[2].Y1, prim[2].X2, prim[2].Y2, prim[2].C);
-            screen.Triangle(100, 500, 100, 100, tr1.C);
+            
+            screen.Bar(prim[0].X, prim[0].Y, prim[0].W, prim[0].H, prim[0].C);
+            screen.Bar(prim[1].X, prim[1].Y, prim[1].W, prim[1].H, prim[1].C);
+            screen.Bar(prim[2].X, prim[2].Y, prim[2].W, prim[2].H, prim[2].C);
+            screen.Circle(prim[3].X, prim[3].Y, prim[3].W, prim[3].C);
+            screen.Triangle(prim[4].X, prim[4].Y, prim[4].W, prim[4].H, prim[4].C);
         }
 
 
@@ -183,23 +210,21 @@ namespace Template
                 for (int j = x; j < y; j++)
                 {
                     floatbuffer[i, j] = new float[] { c[i, j][0], c[i, j][1], c[i, j][2] };
-                    for (int k = 0; k < 4; k++)
+                    for (int k = 0; k < 4; k+=2)
                     {
                         Vector2 pos = new Vector2((worldsize / 639f) * i, (worldsize / 639f) * j);
                         ray.o = new Vector2(lightbuffer[k], lightbuffer[k + 1]);
                         ray.t = distanceToLight(ray, pos) - (2f * offset);
                         ray.d = normalizedDirectionToLight(ray, pos);
                         ray.o = new Vector2(lightbuffer[k] + (ray.d.X * offset), lightbuffer[k + 1] + (ray.d.X * offset));
-                        for (int z = 0; z < prim.Count; z++)
-                        {
-                            if (ray.intersectionc(circ, ray) == false && intersectionBox(ray, pos, prim[z]) == false && intersectionTriangle(ray, pos, tr1) == false)
+                        
+                            if (intersectionPrimitives(ray, pos) == false)
                             {
                                 floatbuffer[i, j][0] += 0 / (float)((ray.t * Math.PI) + 1);
                                 floatbuffer[i, j][1] += 1 / (float)((ray.t * Math.PI) + 1);
                                 floatbuffer[i, j][2] += 1 / (float)((ray.t * Math.PI) + 1);
                             }
-                        }
-                        k++;
+                        
                     }
                 }
             }
@@ -220,13 +245,41 @@ namespace Template
             return ((int)(red * 255) << 16) + ((int)(green * 255) << 8) + (int)(blue * 255);
         }
 
-        public bool intersectionBox(ray r, Vector2 p, box b)
+        public bool intersectionPrimitives(ray r, Vector2 v)
+        {
+            for (int z = 0; z < prim.Count; z++)
+            {
+                if (prim[z].TYPE == "box")
+                {
+                    if (intersectionBox(r, v, prim[z]) == true)
+                    {
+                        return true;
+                    }
+                }
+                if (prim[z].TYPE == "circle")
+                {
+                    if (intersectionCircle(r, v, prim[z]) == true)
+                    {
+                        return true;
+                    }
+                }
+                if (prim[z].TYPE == "triangle")
+                {
+                    if (intersectionTriangle(r, v, prim[z]) == true)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        public bool intersectionBox(ray r, Vector2 p, primitives b)
         {
             //box pixelcoordinates to world coordinates
-            float bx1 = b.X1 * (worldsize / 639f);
-            float by1 = b.Y1 * (worldsize / 639f);
-            float bx2 = b.X2 * (worldsize / 639f);
-            float by2 = b.Y2 * (worldsize / 639f);
+            float bx1 = b.X * (worldsize / 639f);
+            float by1 = b.Y * (worldsize / 639f);
+            float bx2 = (b.X+b.W) * (worldsize / 639f);
+            float by2 = (b.Y+b.H) * (worldsize / 639f);
 
             //4 vectors, for every line of the box 1
             Vector2 blc = new Vector2(bx1, by2);
@@ -239,24 +292,24 @@ namespace Template
                 return true;
             }
             // check for intersection for every vector of the box.
-            if (lineIntersection(r, p, tlc, blc))
+            if (intersectionLine(r, p, tlc, blc))
                 return true;
-            if (lineIntersection(r, p, blc, brc))
+            if (intersectionLine(r, p, blc, brc))
                 return true;
-            if (lineIntersection(r, p, tlc, trc))
+            if (intersectionLine(r, p, tlc, trc))
                 return true;
-            if (lineIntersection(r, p, trc, brc))
+            if (intersectionLine(r, p, trc, brc))
                 return true;
             return false;
         }
 
-        public bool intersectionTriangle(ray r, Vector2 p, triangle t)
+        public bool intersectionTriangle(ray r, Vector2 v, primitives p)
         {
             //box pixelcoordinates to world coordinates
-            float tx = t.X * (worldsize / 639f);
-            float ty = t.Y * (worldsize / 639f);
-            float tw = t.W * (worldsize / 639f);
-            float th = t.H * (worldsize / 639f);
+            float tx = p.X * (worldsize / 639f);
+            float ty = p.Y * (worldsize / 639f);
+            float tw = p.W * (worldsize / 639f);
+            float th = p.H * (worldsize / 639f);
 
             //3 vectors, for every line of the triangle 1
             Vector2 blc = new Vector2(tx , ty+th);
@@ -270,16 +323,41 @@ namespace Template
             //}
 
             // check for intersection for every vector of the triangle.
-            if (lineIntersection(r, p, blc, tc))
+            if (intersectionLine(r, v, blc, tc))
                 return true;
-            if (lineIntersection(r, p, tc, brc))
+            if (intersectionLine(r, v, tc, brc))
                 return true;
-            if (lineIntersection(r, p, brc, blc))
+            if (intersectionLine(r, v, brc, blc))
                 return true;
             return false;
         }
 
-        public bool lineIntersection(ray r, Vector2 p, Vector2 v1, Vector2 v2)
+        public bool intersectionCircle(ray r, Vector2 v, primitives p)
+        {
+            int radius = p.W/2;
+            Vector2 vec = new Vector2(p.X, p.Y);
+            Vector2 c = vec - r.o;
+            float t = Vector2.Dot(c, r.d);
+            Vector2 q = c - (t * r.d);
+            float p2 = Vector2.Dot(q, q);
+            float tocircle = t - (float)Math.Sqrt(((radius * radius) - p2));
+            if (tocircle > r.t || t < 0)
+            {
+                return false;
+            }
+            else
+            {
+
+
+                if ((radius * radius) < p2) { return false; }
+                else
+                {
+                    r.t = t;
+                    return true;
+                }
+            }
+        }
+        public bool intersectionLine(ray r, Vector2 p, Vector2 v1, Vector2 v2)
         {
 
             float d = ((v2.Y - v1.Y) * (-r.o.X + p.X) - (v2.X - v1.X) * (-r.o.Y + p.Y));
@@ -329,89 +407,19 @@ namespace Template
         {
             get { return T; }
             set { T = value; }
-        }
-
-        public bool intersectionc(circles circ, ray ray)
-        {
-            Vector2 c = circ.POS - ray.o;
-            float t = Vector2.Dot(c, ray.d);
-            Vector2 q = c - (t * ray.d);
-            float p2 = Vector2.Dot(q, q);
-            float tocircle = t - (float)Math.Sqrt(((circ.R * circ.R) - p2));
-            if (tocircle > ray.t || t < 0)
-            {
-                return false;
-            }
-            else
-            {
-
-
-                if ((circ.R * circ.R) < p2) { return false; }
-                else
-                {
-                    ray.t = t;
-                    return true;
-                }
-            }
-        }
+        }        
     }
 
     public class primitives
     {
+        int x, y, w, h, c;
+        string type;
 
-    }
-
-    class circles : primitives
-    {
-        float r;
-        Vector2 pos;
-        public Vector2 POS
+        public string TYPE
         {
-            get { return pos; }
-            set { pos = value; }
+            get { return type; }
+            set { type = value; }
         }
-        public float R
-        {
-            get { return r; }
-            set { r = value; }
-        }
-
-    }
-
-    class box : primitives
-    {
-        int x1, y1, x2, y2;
-        int c;
-        public int X1
-        {
-            get { return x1; }
-            set { x1 = value; }
-        }
-        public int Y1
-        {
-            get { return y1; }
-            set { y1 = value; }
-        }
-        public int X2
-        {
-            get { return x2; }
-            set { x2 = value; }
-        }
-        public int Y2
-        {
-            get { return y2; }
-            set { y2 = value; }
-        }
-        public int C
-        {
-            get { return c; }
-            set { c = value; }
-        }
-    }
-    class triangle : primitives
-    {
-        int x, y, w, h;
-        int c;
         public int X
         {
             get { return x; }
@@ -436,6 +444,48 @@ namespace Template
         {
             get { return c; }
             set { c = value; }
+        }
+    }
+
+    class circle : primitives
+    {
+        float r;
+        Vector2 pos;
+        public Vector2 POS
+        {
+            get { return pos; }
+            set { pos = value; }
+        }
+        public float R
+        {
+            get { return r; }
+            set { r = value; }
+        }
+
+    }
+
+    class box : primitives
+    {
+        int x2, y2;
+        
+        public int X2
+        {
+            get { return x2; }
+            set { x2 = value; }
+        }
+        public int Y2
+        {
+            get { return y2; }
+            set { y2 = value; }
+        }
+    }
+    class triangle : primitives
+    {
+        int xt;
+        public int XT
+        {
+            get { return xt; }
+            set { xt = value; }
         }
     }
 }
