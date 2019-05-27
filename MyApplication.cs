@@ -7,28 +7,24 @@ namespace Template
 {
     class MyApplication
     {
-        /*
-         eerste elke pixelcolor 0;
-         pixelcoordinaten omzetten naar x=10,y=10;
-         lijn definieren naar het licht toe.
-         kijken of de lijn een intersectie heeft met een object.
-         wel, doe niks;
-         niet, reken hoeveelheid licht uit.
-         plotten.
-         */
         // member variables
         public Surface screen;
         // 3 floats for the colors per pixel.
         public float[,][] floatbuffer = new float[640, 640][];
         //lightsources list.
         public float[] lightbuffer = new float[4];
+        // worldsize
+        public float worldsize = 20f;
         // primitives list
         List<primitives> prim1 = new List<primitives>();
         List<box> prim = new List<box>();
         // initialize
         public void Init()
         {
-            lightbuffer[1] = 10f;
+            lightbuffer[0] = worldsize-18f;
+            lightbuffer[1] = worldsize - 19f;
+            lightbuffer[2] = worldsize - 2f;
+            lightbuffer[3] = worldsize - 2f;
             box b = new box();
             b.X1 = 400;
             b.X2 = 450;
@@ -54,58 +50,55 @@ namespace Template
         // tick: renders one frame
         public void Tick()
         {
+            float offset = 0.00001f;
             screen.Clear(0);
             ray ray = new ray();
             circles circ = new circles();
             circ.POS = new Vector2(3, 3);
-            circ.R = 1f;            
-            lightbuffer[0] += 1f;
-            lightbuffer[1] -= 1f;
-            lightbuffer[2] += 0.5f;
-            lightbuffer[3] += 1f;
+            circ.R = 1f;
+            if (lightbuffer[0] < 15f)
+            {
+                lightbuffer[0] += 1f;
+            }
+            else
+            {
+                lightbuffer[0] -= 1f;
+            }
+            if (lightbuffer[2] > 15f)
+            {
+                lightbuffer[2] -= 1f;
+            }
+            else
+            {
+                lightbuffer[2] += 1f;
+            }
             for (int i = 0; i < 639; i++)
             {
                 for (int j = 0; j < 639; j++)
                 {
                     floatbuffer[i, j] = new float[] { 0, 0, 0 };
-                    for (int k = 0; k < 2; k++)
+                    for (int k = 0; k < 4; k++)
                     {
-                        Vector2 pos = new Vector2((10f / 639f) * i, (10f / 639f) * j);
+                        Vector2 pos = new Vector2((worldsize / 639f) * i, (worldsize / 639f) * j);
                         ray.o = new Vector2(lightbuffer[k], lightbuffer[k + 1]);
-                        ray.t = distanceToLight(ray, pos);
+                        ray.t = distanceToLight(ray, pos)-(2f*offset);
                         ray.d = normalizedDirectionToLight(ray, pos);
-                        for (int z = 0; z <prim.Count; z++) {
-                            if (ray.intersectionc(circ, ray) == false && intersectionBox(ray, pos, prim[z]) == false)
-                            {
-                                floatbuffer[i, j][0] += 1 / (float)((ray.t * Math.PI) + 1);
-                                floatbuffer[i, j][1] += 0 / (float)((ray.t * Math.PI) + 1);
-                                floatbuffer[i, j][2] += 1 / (float)((ray.t * Math.PI) + 1);
-                            }
-                        }
-                        k++;
-                    }
-                    for (int k = 2; k < 4; k++)
-                    {
-                        Vector2 pos = new Vector2((10f / 639f) * i, (10f / 639f) * j);
-                        ray.o = new Vector2(lightbuffer[k], lightbuffer[k + 1]);
-                        ray.t = distanceToLight(ray, pos);
-                        ray.d = normalizedDirectionToLight(ray, pos);
+                        ray.o = new Vector2(lightbuffer[k]+(ray.d.X*offset), lightbuffer[k + 1]+(ray.d.X*offset));
                         for (int z = 0; z < prim.Count; z++)
                         {
                             if (ray.intersectionc(circ, ray) == false && intersectionBox(ray, pos, prim[z]) == false)
                             {
-                                floatbuffer[i, j][0] += 0 / (float)((ray.t * Math.PI) + 1);
+                                floatbuffer[i, j][0] +=  0/ (float)((ray.t * Math.PI) + 1);
                                 floatbuffer[i, j][1] += 1 / (float)((ray.t * Math.PI) + 1);
                                 floatbuffer[i, j][2] += 1 / (float)((ray.t * Math.PI) + 1);
                             }
                         }
                         k++;
                     }
-                    screen.Plot(i, j, MixColor(floatbuffer[i, j][0], floatbuffer[i, j][1], floatbuffer[i, j][2]));
-
+                    screen.Plot(i, j, MixColor(MathHelper.Clamp(floatbuffer[i, j][0],0,1), MathHelper.Clamp(floatbuffer[i, j][1],0,1), MathHelper.Clamp(floatbuffer[i, j][2],0,1)));
                 }
             }
-            screen.Circle(192, 192, 64, MixColor(1, 0, 1));
+            screen.Circle((int)(circ.POS.X*(639/worldsize)), (int)(circ.POS.Y*(639/worldsize)), (int)(circ.R*(639/worldsize)), MixColor(1, 0, 1));
             screen.Bar(prim[0].X1, prim[0].Y1, prim[0].X2, prim[0].Y2, prim[0].C);
             screen.Bar(prim[1].X1, prim[1].Y1, prim[1].X2, prim[1].Y2, prim[1].C);
             screen.Bar(prim[2].X1, prim[2].Y1, prim[2].X2, prim[2].Y2, prim[2].C);
@@ -129,10 +122,10 @@ namespace Template
         public bool intersectionBox(ray r, Vector2 p, box b)
         {
             //box pixelcoordinates to world coordinates
-            float bx1 = b.X1 * (10f / 639f);
-            float by1 = b.Y1 * (10f / 639f);
-            float bx2 = b.X2 * (10f / 639f);
-            float by2 = b.Y2 * (10f / 639f);
+            float bx1 = b.X1 * (worldsize / 639f);
+            float by1 = b.Y1 * (worldsize / 639f);
+            float bx2 = b.X2 * (worldsize / 639f);
+            float by2 = b.Y2 * (worldsize / 639f);
 
             //4 vectors, for every line of the box 1
             Vector2 blc = new Vector2(bx1, by2);
