@@ -1,6 +1,7 @@
 using OpenTK;
 using System;
 using System.Drawing;
+using System.Threading;
 using System.Collections.Generic;
 
 namespace Template
@@ -10,27 +11,33 @@ namespace Template
         // member variables
         public Surface screen;
         // 3 floats for the colors per pixel.
-        public float[,][] floatbuffer = new float[640, 640][];
+        public static float[,][] floatbuffer = new float[640, 640][];
         //lightsources list.
-        public float[] lightbuffer = new float[4];
+        public static float[] lightbuffer = new float[4];
         // worldsize
-        public float worldsize = 20f;
+        public static float worldsize = 20f;
         // primitives list
-        List<primitives> prim1 = new List<primitives>();
-        List<box> prim = new List<box>();
-        triangle tr1 = new triangle();
+        public static List<primitives> prim1 = new List<primitives>();
+        public static List<box> prim = new List<box>();
+        public static triangle tr1 = new triangle();
+        public static circles circ = new circles();
         //texture
-        Surface map;
-        public float[,][] c;
+        public Surface map;
+        public static float[,][] c;
+
+        public static Thread[] tarr = new Thread[8];
         // initialize
         public void Init()
         {
+            //load in the image and find the colors for every pixel.
             map = new Surface("../../assets/tiles.png");
             c = new float[640, 640][];            texture(floatbuffer, c, map);
+            //start values for the two lights.
             lightbuffer[0] = worldsize - 18f;
             lightbuffer[1] = worldsize - 19f;
             lightbuffer[2] = worldsize - 2f;
             lightbuffer[3] = worldsize - 2f;
+            //declare boxes
             box b = new box();
             b.X1 = 400;
             b.X2 = 450;
@@ -49,25 +56,29 @@ namespace Template
             b2.Y1 = 200;
             b2.Y2 = 250;
             b2.C = MixColor(1, 1, 0);
+
+            //add boxes to box array
             prim.Add(b);
             prim.Add(b1);
             prim.Add(b2);
             
+            //triangle declarationi
             tr1.X = 100;
             tr1.Y = 500;
             tr1.W = 100;
             tr1.H = 100;
             tr1.C = MixColor(0.25f, 5f, 1f);
+
+            //circle declaration
+            circ.POS = new Vector2(3, 3);
+            circ.R = 1f;
+
         }
         // tick: renders one frame
         public void Tick()
         {
-            float offset = 0.00001f;
             screen.Clear(0);
-            ray ray = new ray();
-            circles circ = new circles();
-            circ.POS = new Vector2(3, 3);
-            circ.R = 1f;
+            //move the lights
             if (lightbuffer[0] < 15f)
             {
                 lightbuffer[0] += 1f;
@@ -84,37 +95,114 @@ namespace Template
             {
                 lightbuffer[2] += 1f;
             }
+            //int tr = 0;
+            //while(tr< tarr.Length)
+            //{
+            //    if (tr == 7)
+            //    {
+            //        tarr[tr] = new Thread(() => { plot(tr * 80, 639); });
+
+            //    }
+            //    else
+            //    {
+            //        tarr[tr] = new Thread(() => { plot(tr * 80, (tr + 1) * 80); });
+            //    }
+            //        tr++;
+            //}
+            //tr = 0;
+            Thread t1 = new Thread(() =>
+            {
+                plot(0, 80);
+            });
+            Thread t2 = new Thread(() =>
+            {
+                plot(80, 160);
+            });
+            Thread t3 = new Thread(() =>
+            {
+                plot(160, 240);
+            });
+            Thread t4 = new Thread(() =>
+            {
+                plot(240, 320);
+            });
+            Thread t5 = new Thread(() =>
+            {
+                plot(320, 400);
+            });
+            Thread t6 = new Thread(() =>
+            {
+                plot(400, 480);
+            });
+            Thread t7 = new Thread(() =>
+            {
+                plot(480, 560);
+            });
+            Thread t8 = new Thread(() =>
+            {
+                plot(560, 639);
+            });
+
+            tarr[0] = t1;
+            tarr[1] = t2;
+            tarr[2] = t3;
+            tarr[3] = t4;
+            tarr[4] = t5;
+            tarr[5] = t6;
+            tarr[6] = t7;
+            tarr[7] = t8;
+            for (int td = 0; td < tarr.Length; td++)
+            {
+                tarr[td].Start();
+            }
+            for (int td = 0; td < tarr.Length; td++)
+            {
+                tarr[td].Join();
+            }
             for (int i = 0; i < 639; i++)
             {
                 for (int j = 0; j < 639; j++)
+                {
+                    screen.Plot(i, j, MixColor(MathHelper.Clamp(floatbuffer[i, j][0], 0, 1), MathHelper.Clamp(floatbuffer[i, j][1], 0, 1), MathHelper.Clamp(floatbuffer[i, j][2], 0, 1)));
+                }
+            }
+            screen.Circle((int)(circ.POS.X * (639 / worldsize)), (int)(circ.POS.Y * (639 / worldsize)), (int)(circ.R * (639 / worldsize)), MixColor(1, 0, 1));
+            screen.Bar(prim[0].X1, prim[0].Y1, prim[0].X2, prim[0].Y2, prim[0].C);
+            screen.Bar(prim[1].X1, prim[1].Y1, prim[1].X2, prim[1].Y2, prim[1].C);
+            screen.Bar(prim[2].X1, prim[2].Y1, prim[2].X2, prim[2].Y2, prim[2].C);
+            screen.Triangle(100, 500, 100, 100, tr1.C);
+        }
+
+
+        public void plot(int x, int y)
+        {
+            float offset = 0.00001f;
+            ray ray = new ray();
+            for (int i = 0; i < 639; i++)
+            {
+                for (int j = x; j < y; j++)
                 {
                     floatbuffer[i, j] = new float[] { c[i, j][0], c[i, j][1], c[i, j][2] };
                     for (int k = 0; k < 4; k++)
                     {
                         Vector2 pos = new Vector2((worldsize / 639f) * i, (worldsize / 639f) * j);
                         ray.o = new Vector2(lightbuffer[k], lightbuffer[k + 1]);
-                        ray.t = distanceToLight(ray, pos)-(2f*offset);
+                        ray.t = distanceToLight(ray, pos) - (2f * offset);
                         ray.d = normalizedDirectionToLight(ray, pos);
-                        ray.o = new Vector2(lightbuffer[k]+(ray.d.X*offset), lightbuffer[k + 1]+(ray.d.X*offset));
+                        ray.o = new Vector2(lightbuffer[k] + (ray.d.X * offset), lightbuffer[k + 1] + (ray.d.X * offset));
                         for (int z = 0; z < prim.Count; z++)
                         {
                             if (ray.intersectionc(circ, ray) == false && intersectionBox(ray, pos, prim[z]) == false && intersectionTriangle(ray, pos, tr1) == false)
                             {
-                                floatbuffer[i, j][0] +=  0/ (float)((ray.t * Math.PI) + 1);
+                                floatbuffer[i, j][0] += 0 / (float)((ray.t * Math.PI) + 1);
                                 floatbuffer[i, j][1] += 1 / (float)((ray.t * Math.PI) + 1);
                                 floatbuffer[i, j][2] += 1 / (float)((ray.t * Math.PI) + 1);
                             }
                         }
                         k++;
                     }
-                    screen.Plot(i, j, MixColor(MathHelper.Clamp(floatbuffer[i, j][0],0,1), MathHelper.Clamp(floatbuffer[i, j][1],0,1), MathHelper.Clamp(floatbuffer[i, j][2],0,1)));
                 }
             }
-            screen.Circle((int)(circ.POS.X*(639/worldsize)), (int)(circ.POS.Y*(639/worldsize)), (int)(circ.R*(639/worldsize)), MixColor(1, 0, 1));
-            screen.Bar(prim[0].X1, prim[0].Y1, prim[0].X2, prim[0].Y2, prim[0].C);
-            screen.Bar(prim[1].X1, prim[1].Y1, prim[1].X2, prim[1].Y2, prim[1].C);
-            screen.Bar(prim[2].X1, prim[2].Y1, prim[2].X2, prim[2].Y2, prim[2].C);
-            screen.Triangle(100, 500, 100, 100, tr1.C);
         }
 
         public float distanceToLight(ray ray, Vector2 pos)
