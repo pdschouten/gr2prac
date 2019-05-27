@@ -88,6 +88,7 @@ namespace Template
             for (j = 0; j < 1; j+=0.01)
             {
                 radius = r - r * j;
+                //Console.WriteLine(j);
                 for (i = 0; i < 360; i += 0.1)
                 {
                     angle = i; 
