@@ -19,9 +19,14 @@ namespace Template
         List<primitives> prim1 = new List<primitives>();
         List<box> prim = new List<box>();
         triangle tr1 = new triangle();
+        //texture
+        Surface map;
+        public float[,][] c;
         // initialize
         public void Init()
         {
+            map = new Surface("../../assets/tiles.png");
+            c = new float[640, 640][];            texture(floatbuffer, c, map);
             lightbuffer[0] = worldsize - 18f;
             lightbuffer[1] = worldsize - 19f;
             lightbuffer[2] = worldsize - 2f;
@@ -83,7 +88,7 @@ namespace Template
             {
                 for (int j = 0; j < 639; j++)
                 {
-                    floatbuffer[i, j] = new float[] { 0, 0, 0 };
+                    floatbuffer[i, j] = new float[] { c[i, j][0], c[i, j][1], c[i, j][2] };
                     for (int k = 0; k < 4; k++)
                     {
                         Vector2 pos = new Vector2((worldsize / 639f) * i, (worldsize / 639f) * j);
@@ -199,6 +204,21 @@ namespace Template
             float ua = n / d;
             float ub = n2 / d;
             return (ua >= 0.0f && ua <= 1.0f && ub >= 0.0f && ub <= 1.0f);
+        }
+
+        public static void texture(float[,][] fb, float[,][] c, Surface map)
+        {
+            for (int i = 0; i < 639; i++)
+            {
+                for (int j = 0; j < 639; j++)
+                {
+                    c[i, j] = new float[] { 0, 0, 0 };
+                    c[i, j][0] = ((float)((map.pixels[i + j * 640] & 16711680) >> 16)) / 256f;
+                    c[i, j][1] = ((float)((map.pixels[i + j * 640] & 65280) >> 8)) / 256f;
+                    c[i, j][2] = ((float)(map.pixels[i + j * 640] & 255)) / 256f;
+
+                }
+            }
         }
     }
 
