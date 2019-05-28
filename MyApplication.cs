@@ -34,7 +34,7 @@ namespace Template
         public void Init()
         {
             //load texture and find the colors for every pixel
-            map = new Surface("../../assets/tiles.png");
+            map = new Surface("../../assets/dark.png");
             c = new float[640, 640][];            texture(floatbuffer, c, map);
             
             //lights startvalues
@@ -91,11 +91,12 @@ namespace Template
             //circle declaration
             circle circ1 = new circle();
             circ1.X = 200;
-            circ1.Y = 200;
+            circ1.Y = 400;
             circ1.W = 50;
             circ1.H = circ1.W;
             circ1.POS = new Vector2(3, 3);
             circ1.R = circ1.W/2;
+            circ1.C = MixColor(1, 0.5f, 0.5f);
             circ1.TYPE = "circle";
 
             //add primitives to List            
@@ -110,38 +111,23 @@ namespace Template
         public void Tick()
         {
             screen.Clear(0);
-            ////move the lights
-            //if (lightbuffer[0] < 15f)
-            //{
-            //    lightbuffer[0] += 1f;
-            //}
-            //else
-            //{
-            //    lightbuffer[0] -= 1f;
-            //}
-            //if (lightbuffer[2] > 15f)
-            //{
-            //    lightbuffer[2] -= 1f;
-            //}
-            //else
-            //{
-            //    lightbuffer[2] += 1f;
-            //}
-            //int tr = 0;
-            //while(tr< tarr.Length)
-            //{
-            //    if (tr == 7)
-            //    {
-            //        tarr[tr] = new Thread(() => { plot(tr * 80, 639); });
-
-            //    }
-            //    else
-            //    {
-            //        tarr[tr] = new Thread(() => { plot(tr * 80, (tr + 1) * 80); });
-            //    }
-            //        tr++;
-            //}
-            //tr = 0;
+            //move the lights
+            if (lightbuffer[0] < 15f)
+            {
+                lightbuffer[0] += 1f;
+            }
+            else
+            {
+                lightbuffer[0] -= 1f;
+            }
+            if (lightbuffer[5] > 15f)
+            {
+                lightbuffer[5] -= 1f;
+            }
+            else
+            {
+                lightbuffer[5] += 1f;
+            }
             Thread t1 = new Thread(() =>
             {
                 plot(0, 80);
@@ -355,8 +341,8 @@ namespace Template
 
         public bool intersectionCircle(ray r, Vector2 v, primitives p)
         {
-            int radius = p.W/2;
-            Vector2 vec = new Vector2(p.X, p.Y);
+            float radius = ((p.W/2)*(worldsize / 639f));
+            Vector2 vec = new Vector2(p.X*(worldsize / 639f), p.Y* (worldsize / 639f));
             Vector2 c = vec - r.o;
             float t = Vector2.Dot(c, r.d);
             Vector2 q = c - (t * r.d);
