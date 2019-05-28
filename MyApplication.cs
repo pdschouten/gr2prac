@@ -15,7 +15,7 @@ namespace Template
         public static float[,][] floatbuffer = new float[640, 640][];
 
         //lightsources list.
-        public static float[] lightbuffer = new float[4];
+        public static float[] lightbuffer = new float[10];
 
         // worldsize
         public static float worldsize = 20f;
@@ -36,12 +36,18 @@ namespace Template
             //load texture and find the colors for every pixel
             map = new Surface("../../assets/tiles.png");
             c = new float[640, 640][];            texture(floatbuffer, c, map);
-
+            
             //lights startvalues
             lightbuffer[0] = worldsize - 18f;
             lightbuffer[1] = worldsize - 19f;
-            lightbuffer[2] = worldsize - 2f;
-            lightbuffer[3] = worldsize - 2f;
+            lightbuffer[2] = 0f;
+            lightbuffer[3] = 1f;
+            lightbuffer[4] = 1f;
+            lightbuffer[5] = worldsize - 2f;
+            lightbuffer[6] = worldsize - 2f;
+            lightbuffer[7] = 1f;
+            lightbuffer[8] = 1f;
+            lightbuffer[9] = 0f;
 
             //box declaration            
             box b1 = new box();
@@ -51,7 +57,7 @@ namespace Template
             b1.H = 50;
             b1.X2 = b1.X + b1.W;
             b1.Y2 = b1.Y + b1.H;
-            b1.C = MixColor(0, 0, 1);
+            b1.C = MixColor(0, 1, 1);
             b1.TYPE = "box";
             box b2 = new box();
             b2.X = 400;
@@ -60,7 +66,7 @@ namespace Template
             b2.H = 50;
             b2.X2 = b2.X + b2.W;
             b2.Y2 = b2.Y + b2.H;
-            b2.C = MixColor(0, 1, 0);
+            b2.C = MixColor(0, 1, 1);
             b2.TYPE = "box";
             box b3 = new box();
             b3.X = 400;
@@ -69,7 +75,7 @@ namespace Template
             b3.H = 50;
             b3.X2 = b3.X + b3.W;
             b3.Y2 = b3.Y + b3.H;
-            b3.C = MixColor(1, 0, 0);
+            b3.C = MixColor(1, 1, 0);
             b3.TYPE = "box";
 
             //triangle declaration
@@ -224,7 +230,7 @@ namespace Template
                 for (int j = x; j < y; j++)
                 {
                     floatbuffer[i, j] = new float[] { c[i, j][0], c[i, j][1], c[i, j][2] };
-                    for (int k = 0; k < 4; k+=2)
+                    for (int k = 0; k < lightbuffer.Length; k+=5)
                     {
                         Vector2 pos = new Vector2((worldsize / 639f) * i, (worldsize / 639f) * j);
                         ray.o = new Vector2(lightbuffer[k], lightbuffer[k + 1]);
@@ -234,9 +240,9 @@ namespace Template
 
                         if (intersectionPrimitives(ray, pos) == false)
                         {
-                            floatbuffer[i, j][0] += 0 / (float)((ray.t * Math.PI) + 1);
-                            floatbuffer[i, j][1] += 1 / (float)((ray.t * Math.PI) + 1);
-                            floatbuffer[i, j][2] += 1 / (float)((ray.t * Math.PI) + 1);
+                            floatbuffer[i, j][0] += lightbuffer[k+2] / (float)((ray.t * Math.PI) + 1);
+                            floatbuffer[i, j][1] += lightbuffer[k+3] / (float)((ray.t * Math.PI) + 1);
+                            floatbuffer[i, j][2] += lightbuffer[k+4] / (float)((ray.t * Math.PI) + 1);
                         }
                     }
                 }
