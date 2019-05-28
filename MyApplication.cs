@@ -207,7 +207,8 @@ namespace Template
             {
                 if (prim[i].TYPE == "box")
                 {
-                    screen.Bar(prim[i].X, prim[i].Y, prim[i].W, prim[i].H, prim[i].C);
+                    var box = prim[i] as box;
+                    screen.Bar(prim[i].X, prim[i].Y, box.X2, box.Y2, prim[i].C);
                 }
                 if (prim[i].TYPE == "circle")
                 {
